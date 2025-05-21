@@ -2,7 +2,7 @@
 import streamlit as st
 import requests
 
-STATUS_URL = "https://soil-prefix-moses-wells.trycloudflare.com/status"
+STATUS_URL = "https://cabin-had-depot-of.trycloudflare.com/status"
 
 st.set_page_config(page_title="Crypto Bot Control Panel", layout="wide")
 
