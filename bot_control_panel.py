@@ -1,27 +1,61 @@
+
 import streamlit as st
-import pandas as pd
-import sqlite3
-from pathlib import Path
+import subprocess
+import json
+import os
+from datetime import datetime
 
-st.set_page_config(page_title="Bot Control Panel", layout="wide")
+# === CONFIG ===
+SNIPER_CMD = "python aggressive_sniper_bot.py"
+RSI_CMD = "python rsi_trade_bot.py"
+import requests
 
+STATUS_URL = "https://0e909cb3ac8968.lhr.life/status"
+
+def load_bot_status():
+    try:
+        response = requests.get(STATUS_URL)
+        if response.status_code == 200:
+            return response.json()
+    except Exception as e:
+        print("Error loading status:", e)
+    return {"rsi_bot": False, "sniper_bot": False}
+
+# For process tracking
+running_processes = {}
+
+# === UTILS ===
+def get_last_action(file, limit=3):
+    if not os.path.exists(file):
+        return []
+    with open(file, "r") as f:
+        lines = f.readlines()[-limit:]
+    return [line.strip() for line in lines]
+
+def load_state(file):
+    if not os.path.exists(file):
+        return {}
+    with open(file, "r") as f:
+        return json.load(f)
+
+# === DASHBOARD UI ===
+st.set_page_config(page_title="Bot Control Panel", layout="centered")
 st.title("🤖 Crypto Bot Control Panel")
 
-status_cols = st.columns(2)
-status_cols[0].error("Sniper Bot: Not running")
-status_cols[1].error("RSI Bot: Not running")
+status = load_bot_status()
 
-st.write("---")
+col1, col2 = st.columns(2)
 
-st.subheader("Log DB Summary:")
-db_path = Path("trade_logs.db")
-if db_path.exists():
-    conn = sqlite3.connect(db_path)
-    df = pd.read_sql("SELECT * FROM trades ORDER BY timestamp DESC LIMIT 50", conn)
-    conn.close()
-    st.dataframe(df)
-else:
-    st.info("trade_logs.db not found. Logs will appear here once available.")
+with col1:
+    st.subheader("🎯 Sniper Bot")
+    if status["sniper_bot"]:
+        st.success("Sniper Bot: Running")
+    else:
+        st.error("Sniper Bot: Not running")
 
-st.write("---")
-st.button("🚨 EMERGENCY STOP ALL", disabled=True)
+with col2:
+    st.subheader("📈 RSI Bot")
+    if status["rsi_bot"]:
+        st.success("RSI Bot: Running")
+    else:
+        st.error("RSI Bot: Not running")
