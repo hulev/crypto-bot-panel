@@ -2,7 +2,7 @@
 import streamlit as st
 import requests
 
-STATUS_URL = "https://spanish-solution-story-stanford.trycloudflare.com"
+STATUS_URL = "https://api.hulevbot.org/status"
 
 st.set_page_config(page_title="Crypto Bot Control Panel", layout="wide")
 
